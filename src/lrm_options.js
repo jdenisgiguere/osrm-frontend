@@ -30,7 +30,7 @@ module.exports = {
     geocodersClassName: 'osrm-directions-inputs',
     createGeocoder: createGeocoder,
     itineraryBuilder: 'osrm-directions-steps',
-    showAlternatives: true,
+    showAlternatives: false,
     useZoomParameter: false,
     routeDragInterval: 100
   },

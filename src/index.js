@@ -65,8 +65,8 @@ var ReversablePlan = L.Routing.Plan.extend({
 
 /* Setup markers */
 function makeIcon(i, n) {
-  var url = 'images/marker-via-icon-2x.png';
-  var markerList = ['images/marker-start-icon-2x.png', 'images/marker-end-icon-2x.png'];
+  var chargerIcon = 'images/marker-charger-icon-2x.png';
+  var markerList = ['images/marker-end-icon-2x.png', 'images/marker-end-icon-2x.png'];
   if (i === 0) {
     return L.icon({
       iconUrl: markerList[0],
@@ -82,9 +82,9 @@ function makeIcon(i, n) {
     });
   } else {
     return L.icon({
-      iconUrl: url,
-      iconSize: [20, 56],
-      iconAnchor: [10, 28]
+      iconUrl: chargerIcon,
+      iconSize: [25, 70],
+      iconAnchor: [10, 36]
     });
   }
 }
@@ -149,6 +149,62 @@ plan.on('waypointgeocoded', function(e) {
   if (plan._waypoints.filter(function(wp) { return !!wp.latLng; }).length < 2) {
     map.panTo(e.waypoint.latLng);
   }
+});
+
+var makeWaypoint = function(lat, lon) {
+  return L.Routing.waypoint(L.latLng(lat, lon));
+}
+
+var sendEvnavRequest = function(evnavUrl, callback) {
+  //evnavUrl = 'http://localhost:8080/route/v1/evnav/-73.57225,45.53847;-71.28751,46.79206?battery=18&SOC_act=0.8'
+  $.ajax({
+    url: evnavUrl,
+    dataType: 'json',
+    success: callback,
+    error: function(req, status, error) {
+      console.log(error);
+    }
+  })
+}
+
+var waypointLocToString = function(wp) {
+  return wp.latLng.lng + "," + wp.latLng.lat;
+}
+
+plan.on('waypointdragend', function(e) {
+  var wps = plan.getWaypoints();
+  if (wps.length < 2)
+      return;
+  var src = wps[0];
+  var dst = wps[wps.length - 1];
+  var queryUrl = "http://localhost:8080/route/v1/evnav/" +
+      waypointLocToString(src) + ";" + waypointLocToString(dst) +
+      "?" + "battery=18&SOC_act=0.8";
+  console.log("queryUrl:" + queryUrl);
+  sendEvnavRequest(queryUrl, function(data) {
+    if (data.code === "Ok") {
+      var wps = plan.getWaypoints();
+      if (data.message === "reachable") {
+        lrmControl.options.lineOptions.styles[0].color = '#022bb1';
+        var steps = data.charging_steps;
+        var newWps = [wps[0]];
+        for (var i = 0; i < steps.length; i++) {
+          var lon = steps[i]["location"][0];
+          var lat = steps[i]["location"][1];
+          var chargerWP = makeWaypoint(lat, lon)
+          chargerWP.is_charger = true;
+          newWps.push(chargerWP);
+        }
+        newWps.push(wps[wps.length - 1]);
+        plan.setWaypoints(newWps);
+
+      } else {
+        // unreachable with an electric car
+        lrmControl.options.lineOptions.styles[0].color = '#b10214';
+        plan.setWaypoints([wps[0], wps[wps.length - 1]]);
+      }
+    }
+  });
 });
 
 // add onClick event

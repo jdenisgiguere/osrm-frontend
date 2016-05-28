@@ -178,8 +178,13 @@ plan.on('waypointdragend', function(e) {
   var src = wps[0];
   var dst = wps[wps.length - 1];
   var queryUrl = "http://localhost:8080/route/v1/evnav/" +
-      waypointLocToString(src) + ";" + waypointLocToString(dst) +
-      "?" + "battery=18&SOC_act=0.8";
+      waypointLocToString(src) + ";" + waypointLocToString(dst) + "?" +
+      "battery=21&" +
+      "SOC_act=1.0&" +
+      "SOC_min=0.1&" +
+      "SOC_max=0.8&" +
+      "efficiency=0.190&" +
+      "power_avg=33.0";
   console.log("queryUrl:" + queryUrl);
   sendEvnavRequest(queryUrl, function(data) {
     if (data.code === "Ok") {

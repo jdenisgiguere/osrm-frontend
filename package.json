@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "eslint src/*js i18n/*.js",
-    "build": "browserify -d src/index.js -s osrm > bundle.raw.js && uglifyjs bundle.raw.js -c -m --source-map=bundle.js.map -o bundle.js",
+    "build": "browserify -d src/index.js -s osrm > bundle.raw.js && uglifyjs bundle.raw.js -c -m --source-map=bundle.js.map -o bundle.js && cp node_modules/leaflet/dist/leaflet.css css/leaflet.css &&  cp node_modules/mapseed-sidebar/css/leaflet-sidebar.css css/leaflet-sidebar.css",
     "start-index": "budo src/index.js --serve=bundle.js --live -d | bistre",
     "start": "npm run build && npm run start-index",
     "prepub": "npm run build"
@@ -34,6 +34,7 @@
     "leaflet-control-geocoder": "^1.2.1",
     "leaflet-routing-machine": "^3.0.1",
     "leaflet.locatecontrol": "^0.44.0",
+    "mapseed-sidebar": "^0.3.2",
     "local-storage": "^1.4.2",
     "qs": "^6.1.0"
   }

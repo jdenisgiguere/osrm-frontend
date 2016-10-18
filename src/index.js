@@ -3,6 +3,7 @@
 var L = require('leaflet');
 var Geocoder = require('leaflet-control-geocoder');
 var LRM = require('leaflet-routing-machine');
+var mapseedSidebar = require("mapseed-sidebar/js/leaflet-sidebar");
 var itineraryBuilder = require('./itinerary_builder');
 var locate = require('leaflet.locatecontrol');
 var options = require('./lrm_options');
@@ -36,6 +37,11 @@ mapLayer = mapLayer.reduce(function(title, layer) {
   });
   return title;
 });
+
+//Display EvNav info
+var sidebar = L.control.sidebar('evnav');
+sidebar.addTo(map);
+
 
 /* Leaflet Controls */
 L.control.layers(mapLayer, overlay, {

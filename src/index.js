@@ -94,10 +94,14 @@ function makeIcon(i, n) {
 
 //setup charging popup
 var chargingPopup = function(charging_step) {
-  var chargingDurationInMinutes = (charging_step.charging_duration / 60.0).toFixed(0);
-  var content = "<h3>" + charging_step.name + "</h3>" + "<p>Durée de la recharge : " + chargingDurationInMinutes +
-      " minutes</p>";
-
+  var chargingDurationInMinutes = (charging_step.charging_duration / 60.0);
+  var content = "<ul class='list-group'>";
+  content += "<li class='list-group-item active'>" + charging_step.name + "</li>";
+  content += "<li class='list-group-item'>Énergie: <span class='badge'>" + charging_step.energy.toFixed(1) + " kWh</span></li>";
+  content += "<li class='list-group-item'>Durée: <span class='badge'>" + chargingDurationInMinutes.toFixed(0) + " min</span></li>";
+  content += "<li class='list-group-item'>Coût: <span class='badge'>" + charging_step.charging_cost.toFixed(2) + " $</span></li>";
+  content += "</ul>";
+  console.log(content);
   return content;
 };
 
@@ -105,34 +109,29 @@ var plan = new ReversablePlan([], {
   geocoder: Geocoder.nominatim(),
   routeWhileDragging: true,
   createMarker: function(i, wp, n) {
+    // Do not enable dragging for chargers
+    var enableDraggable = (i === 0 || i === (n - 1)) && this.draggableWaypoints;
     var options = {
-      draggable: this.draggableWaypoints,
+      draggable: enableDraggable,
       icon: makeIcon(i, n)
     };
     var marker = L.marker(wp.latLng, options);
-    marker.on('click', function() {
-      plan.spliceWaypoints(i, 1);
-    });
 
     if (i > 0 && i < (n - 1)) {
       marker.bindPopup(wp.popupContent);
-      marker.on('mouseover', function(e) {
+      marker.on('click', function(e) {
         this.openPopup();
       });
-      marker.on('mouseout', function(e) {
-        this.closePopup();
-      });
-
     }
 
     return marker;
   },
   routeDragInterval: options.lrm.routeDragInterval,
-  addWaypoints: true,
+  addWaypoints: false,
   waypointMode: 'snap',
   position: 'topright',
   useZoomParameter: options.lrm.useZoomParameter,
-  reverseWaypoints: true,
+  reverseWaypoints: false,
   dragStyles: options.lrm.dragStyles,
   geocodersClassName: options.lrm.geocodersClassName,
   geocoderPlaceholder: function(i, n) {

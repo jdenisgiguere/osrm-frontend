@@ -37,10 +37,6 @@ mapLayer = mapLayer.reduce(function(title, layer) {
   return title;
 });
 
-//Display EvNav info
-var sidebar = L.control.sidebar('evnav');
-sidebar.addTo(map);
-
 
 /* Leaflet Controls */
 L.control.layers(mapLayer, overlay, {
@@ -73,7 +69,7 @@ var ReversablePlan = L.Routing.Plan.extend({
 /* Setup markers */
 function makeIcon(i, n) {
   var chargerIcon = 'images/marker-charger-icon-2x.png';
-  var markerList = ['images/marker-end-icon-2x.png', 'images/marker-end-icon-2x.png'];
+  var markerList = ['images/marker-start-icon-2x.png', 'images/marker-end-icon-2x.png'];
   if (i === 0) {
     return L.icon({
       iconUrl: markerList[0],
@@ -96,6 +92,17 @@ function makeIcon(i, n) {
   }
 }
 
+//setup charging popup
+var chargingPopup = function(charging_step) {
+
+  var chargingDurationInMinutes = (charging_step.charging_duration / 60.0).toFixed(0);
+  var content = "<h3>" + charging_step.name + "</h3>" + "<p>Durée de la recharge : " + chargingDurationInMinutes +
+      " minutes</p>";
+
+  return content;
+};
+
+
 var plan = new ReversablePlan([], {
   geocoder: Geocoder.nominatim(),
   routeWhileDragging: true,
@@ -104,10 +111,23 @@ var plan = new ReversablePlan([], {
       draggable: this.draggableWaypoints,
       icon: makeIcon(i, n)
     };
+    //wp.popupContent = "Hello";
     var marker = L.marker(wp.latLng, options);
     marker.on('click', function() {
       plan.spliceWaypoints(i, 1);
     });
+
+    if (i > 0 && i < (n - 1)) {
+      marker.bindPopup(wp.popupContent);
+      marker.on('mouseover', function(e) {
+        this.openPopup();
+      });
+      marker.on('mouseout', function(e) {
+        this.closePopup();
+      });
+
+    }
+
     return marker;
   },
   routeDragInterval: options.lrm.routeDragInterval,
@@ -203,7 +223,8 @@ plan.on('waypointdragend', function(e) {
         for (var i = 0; i < steps.length; i++) {
           var lon = steps[i]["location"][0];
           var lat = steps[i]["location"][1];
-          var chargerWP = makeWaypoint(lat, lon)
+          var chargerWP = makeWaypoint(lat, lon);
+          chargerWP.popupContent = chargingPopup(steps[i]); // + "/n Durée de la recharge : " + (steps[i].duration / 60.0).toFixed(0) + " minutes";
           chargerWP.is_charger = true;
           newWps.push(chargerWP);
         }

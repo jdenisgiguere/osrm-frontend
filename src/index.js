@@ -87,7 +87,8 @@ function makeIcon(i, n) {
     return L.icon({
       iconUrl: chargerIcon,
       iconSize: [25, 70],
-      iconAnchor: [10, 36]
+      iconAnchor: [10, 36],
+      popupAnchor: [2, -36]
     });
   }
 }

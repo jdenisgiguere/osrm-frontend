@@ -97,12 +97,11 @@ function makeIcon(i, n) {
 var chargingPopup = function(charging_step) {
   var chargingDurationInMinutes = (charging_step.charging_duration / 60.0);
   var content = "<ul class='list-group'>";
-  content += "<li class='list-group-item active'>" + charging_step.name + "</li>";
+  content += "<li class='list-group-item active' style='min-width:225px;'>" + charging_step.name + "</li>";
   content += "<li class='list-group-item'>Énergie: <span class='badge'>" + charging_step.energy.toFixed(1) + " kWh</span></li>";
   content += "<li class='list-group-item'>Durée: <span class='badge'>" + chargingDurationInMinutes.toFixed(0) + " min</span></li>";
   content += "<li class='list-group-item'>Coût: <span class='badge'>" + charging_step.charging_cost.toFixed(2) + " $</span></li>";
   content += "</ul>";
-  console.log(content);
   return content;
 };
 
